@@ -1,30 +1,37 @@
 import sys
 from datetime import datetime
-values = dict()
+
+categories = eval(open(".revolut.conversion").read())
 with open(sys.argv[1]) as f:
     entries = f.readlines()
-
     
     for entry in entries[1:]:
-        #print(entry)
         val = dict()
         vals = entry.split(',')
-        val["date"] = vals[0]
-        date = datetime.strptime(val["date"][:-1], "%d %b %Y")
-        val["ref"] = vals[1]
-        val["out"] = vals[2]
-        val["in"] = vals[3]
-        val["ex out"] = vals[4]
-        val["ex in"] = vals[5]
-        val["bal"] = vals[6]
+
+        date = vals[0]
+        date = datetime.strptime(date[:-1], "%d %b %Y")
+        ref = vals[1]
+        out_str = vals[2]
+        in_str = vals[3]
+
         print(date.strftime("%Y/%m/%d"), end='')
-        print(val["ref"], end='')
-        if val["out"] == "  ":
-            num = float(val["in"])
+        print(ref, end='')
+        if out_str == "  ":
+            num = float(in_str)
         else:
-            num = -1 * float(val["out"])
-        print("\n    assets:bank " + str(num))
-        print("    expenses:misc")
+            num = -1 * float(out_str)
+        print("\n    assets:bank     " + str(num))
+
+        done = False
+        for key, val in categories.items():
+            if key in ref:
+                print("    expenses:" + val)
+                done = True
+                break
+        if not done:
+            print("    expenses:misc")
         print("")
-        #expenses:food
+
+    f.close()
 
